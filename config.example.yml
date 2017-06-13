@@ -1,0 +1,9 @@
+SECRET_KEY: "huy"
+USERS:
+  marty_mcfly: Marty McFly
+  biff_tannen: Biff Tannen
+STARTING_COINS: 50
+SOLUTION_COST: 1000
+RACE_DELAY: 1
+PER_CHAR_DELAY: 0.1
+

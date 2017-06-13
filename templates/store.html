@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>HackStore</h2>
+Welcome to the Hack Store, {{ name }}!
+<a href="{{ url_for('logout', github=github) }}">Logout</a>
+<h3>The Solution</h3>
+{% if solution %}
+Congrats! You earned it:
+<p>{{ solution }}</p>
+{% else %}
+Wanna buy the solution to this puzzle? You need 1000 HackCoin!
+{% endif %}
+<h3>Your Account</h3>
+Your account balance {{ balance }} HackCoins.
+<h4>Transfer</h4>
+<form method="POST" action="{{ url_for('transfer', github=github) }}">
+	To:
+	<select name="to">
+		{% for username, name in transfer_users.items() %}
+		<option value="{{ username }}">{{ name }}</option>
+		{% endfor %}
+	</select>
+	<input type="submit" value="Transfer" />
+</form>
+{% endblock %}

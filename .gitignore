@@ -1,0 +1,5 @@
+venv/
+*.py[ocd]
+__pycache__/
+
+config.yml

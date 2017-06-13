@@ -1,0 +1,4 @@
+*.py[ocd]
+__pycache__/
+venv/
+

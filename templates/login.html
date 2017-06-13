@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Login</h2>
+<form method="POST" action="{{ url_for('login', github=github) }}">
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+		{{ message }}<br />
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+	user: <select name="username">
+		{% for user, name in users.items() %}
+		<option value="{{ user }}">{{ name }}</option>
+		{% endfor %}
+	</select>
+	password: <input type="password" name="password" />
+	<input type="submit" value="Login" />
+</form>
+{% endblock %}
