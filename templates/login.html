@@ -1,21 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Login</h2>
-<form method="POST" action="{{ url_for('login', github=github) }}">
+<div class="red">
 {% with messages = get_flashed_messages() %}
-	{% if messages %}
-		{% for message in messages %}
-		{{ message }}<br />
+  {% if messages %}
+    {% for message in messages %}
+    {{ message }}<br />
     {% endfor %}
   {% endif %}
 {% endwith %}
+</div>
 
-	user: <select name="username">
-		{% for user, name in users.items() %}
-		<option value="{{ user }}">{{ name }}</option>
-		{% endfor %}
-	</select>
-	password: <input type="password" name="password" />
+<form method="POST" action="{{ url_for('login', github=github) }}">
+  <table>
+    <tr>
+      <td class="fs">user</td>
+      <td>
+        <select name="username">
+          {% for user, name in users.items() %}
+          <option value="{{ user }}"{% if user == username %} selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td class="fs">password</td>
+      <td><input type="password" name="password" /></td>
+    </tr>
+  </table>
 	<input type="submit" value="Login" />
 </form>
 {% endblock %}

@@ -23,6 +23,7 @@ SOLUTION_COST = config.get('SOLUTION_COST', 1000)
 RACE_DELAY = config.get('RACE_DELAY', 1)
 REDIS_URL = config.get('REDIS_URL', 'redis://')
 
+
 the_redis = StrictRedis.from_url(REDIS_URL)
 balances = RacyBalances(the_redis, STARTING_COINS, RACE_DELAY)
 
@@ -39,7 +40,7 @@ def authed(f):
 
 @app.route('/')
 def index():
-    return "/&lt;ur_github&gt;"
+    return render_template('intro.html')
 
 @app.route('/<github>/login', methods=['GET', 'POST'])
 def login(github):
@@ -64,7 +65,7 @@ def login(github):
                     flash('Bad Password')
         else:
             flash('invalid user')
-        return render_template('login.html', github=github, users=USERS)
+        return render_template('login.html', github=github, users=USERS, username=username)
 
 
 @app.route('/<github>/')

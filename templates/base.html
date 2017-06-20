@@ -1,3 +1,41 @@
-<h1>hack-store</h1>
-{% block content %}
-{% endblock %}
+<html>
+  <head>
+    <title>Hack Store</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700" rel="stylesheet">
+    <style type="text/css">
+    body {
+      background-color: #252c37;
+      color: #ffffff;
+      font-family: 'Poppins';
+    }
+    .blue {
+      color: #74d1ea;
+    }
+    .red {
+      color: #ff585d;
+    }
+    .container {
+      width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .fs {
+      text-align: right;
+    }
+    table {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    a {
+      color: #74d1ea;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1><span class="red">HACK</span><span class="blue">Store</span></h1>
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+</html>
