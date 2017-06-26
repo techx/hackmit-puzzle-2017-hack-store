@@ -42,7 +42,7 @@ def authed(f):
 def index():
     return render_template('intro.html')
 
-@app.route('/<github>/login', methods=['GET', 'POST'])
+@app.route('/u/<github>/login', methods=['GET', 'POST'])
 def login(github):
     if session.get('gh') == github and session.get('username') in USERS:
         return redirect(url_for('store', github=github))
@@ -68,7 +68,7 @@ def login(github):
         return render_template('login.html', github=github, users=USERS, username=username)
 
 
-@app.route('/<github>/')
+@app.route('/u/<github>/')
 @authed
 def store(github):
     balance = balances.get(github, session['username'])
@@ -83,7 +83,7 @@ def store(github):
     name = USERS[session['username']]
     return render_template('store.html', transfer_users=transfer_users, github=github, balance=balance, solution=solution, solution_cost=SOLUTION_COST, name=name)
 
-@app.route('/<github>/transfer', methods=['POST'])
+@app.route('/u/<github>/transfer', methods=['POST'])
 @authed
 def transfer(github):
     other_username = request.form.get('to', '')
@@ -94,7 +94,7 @@ def transfer(github):
     balances.transfer(github, session['username'], other_username)
     return redirect(url_for('store', github=github))
 
-@app.route('/<github>/logout')
+@app.route('/u/<github>/logout')
 @authed
 def logout(github):
     session.clear()
