@@ -13,5 +13,7 @@ COPY . $APP_PATH
 
 WORKDIR $APP_PATH
 
-CMD ["uwsgi", "--gevent", "100", "--gevent-monkey-patch", "--http", ":8000", "--module", "prod:app"]
+ENV GEVENT_N 100
+
+CMD ["uwsgi", "--gevent", "echo ${GEVENT_N}", "--gevent-monkey-patch", "--http", ":8000", "--module", "prod:app"]
 
