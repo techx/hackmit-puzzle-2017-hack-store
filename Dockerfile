@@ -13,5 +13,4 @@ COPY . $APP_PATH
 
 WORKDIR $APP_PATH
 
-CMD ["uwsgi", "--static-map", "/static=static", "--gevent", "100", "--http", ":8000", "--module", "prod:app"]
-
+CMD ["uwsgi", "--static-map", "/static=static", "--gevent", "400", "--http", ":8000", "--module", "prod:app"]

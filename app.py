@@ -1,10 +1,11 @@
-from flask import Flask, session, request, render_template, redirect, url_for, flash
+from flask import Flask, session, request, render_template, redirect, url_for, flash, Response
 from functools import wraps
 from timing_attack import slow_compare, gen_password, good_pass
 from data_race import RacyBalances
 import yaml
 import os
 from redis import StrictRedis
+from date_hash import date_hash
 
 app = Flask(__name__)
 
@@ -42,22 +43,29 @@ def authed(f):
 def index():
     return render_template('intro.html')
 
-@app.route('/<github>/login', methods=['GET', 'POST'])
+RESPONSE_TIME_HEADER = 'X-Upstream-Response-Time'
+
+@app.route('/u/<github>/login', methods=['GET', 'POST'])
 def login(github):
     if session.get('gh') == github and session.get('username') in USERS:
         return redirect(url_for('store', github=github))
     if request.method == 'GET':
-        return render_template('login.html', github=github, users=USERS)
+        resp = Response(render_template('login.html', github=github, users=USERS))
+        resp.headers[RESPONSE_TIME_HEADER] = '0.01'
+        return resp
     else:
         username = request.form.get('username', '')
         password = request.form.get('password', '')
+        response_time = 0.01
         if username in USERS:
             if not good_pass(password):
                 flash('Invalid Password (must be alphanumeric 6-12 characters)')
             else:
                 actual_password = gen_password(app.secret_key, github, username)
                 print(actual_password)
-                if slow_compare(password, actual_password, PER_CHAR_DELAY):
+                correct, compare_time = slow_compare(password, actual_password, PER_CHAR_DELAY)
+                response_time += compare_time
+                if correct:
                     session['gh'] = github
                     session['username'] = username
                     return redirect(url_for('store', github=github))
@@ -65,16 +73,18 @@ def login(github):
                     flash('Bad Password')
         else:
             flash('invalid user')
-        return render_template('login.html', github=github, users=USERS, username=username)
+        resp = Response(render_template('login.html', github=github, users=USERS, username=username))
+        resp.headers[RESPONSE_TIME_HEADER] = response_time
+        return resp
 
 
-@app.route('/<github>/')
+@app.route('/u/<github>/')
 @authed
 def store(github):
     balance = balances.get(github, session['username'])
     solution = None
     if balance >= SOLUTION_COST:
-        solution = "sdfjsdkfsj"
+        solution = date_hash(app.secret_key, github)
     transfer_users = {k : v for k, v in USERS.items() if k != session['username']}
     total = sum(map(lambda u: balances.get(github, u), transfer_users)) + balance
     if total == 0:
@@ -83,7 +93,7 @@ def store(github):
     name = USERS[session['username']]
     return render_template('store.html', transfer_users=transfer_users, github=github, balance=balance, solution=solution, solution_cost=SOLUTION_COST, name=name)
 
-@app.route('/<github>/transfer', methods=['POST'])
+@app.route('/u/<github>/transfer', methods=['POST'])
 @authed
 def transfer(github):
     other_username = request.form.get('to', '')
@@ -94,7 +104,7 @@ def transfer(github):
     balances.transfer(github, session['username'], other_username)
     return redirect(url_for('store', github=github))
 
-@app.route('/<github>/logout')
+@app.route('/u/<github>/logout')
 @authed
 def logout(github):
     session.clear()
