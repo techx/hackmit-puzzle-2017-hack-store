@@ -5,6 +5,7 @@ from data_race import RacyBalances
 import yaml
 import os
 from redis import StrictRedis
+from date_hash import date_hash
 
 app = Flask(__name__)
 
@@ -83,7 +84,7 @@ def store(github):
     balance = balances.get(github, session['username'])
     solution = None
     if balance >= SOLUTION_COST:
-        solution = "sdfjsdkfsj"
+        solution = date_hash(app.secret_key, github)
     transfer_users = {k : v for k, v in USERS.items() if k != session['username']}
     total = sum(map(lambda u: balances.get(github, u), transfer_users)) + balance
     if total == 0:
