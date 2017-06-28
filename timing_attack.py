@@ -18,8 +18,10 @@ def gen_password(secret, gh, username):
 
 def slow_compare(a, b, delay):
     correct = len(a) == len(b)
+    t = 0.0
     for i in range(min(map(len, [a, b]))):
         if a[i] != b[i]:
-            return False
+            return (False, t)
         time.sleep(delay)
-    return correct
+        t += delay
+    return (correct, t)
