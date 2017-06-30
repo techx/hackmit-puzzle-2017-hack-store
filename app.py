@@ -6,6 +6,12 @@ import yaml
 import os
 from redis import StrictRedis
 from date_hash import date_hash
+import statsd
+
+statsd_client = statsd.StatsClient(os.environ.get('STATSD_HOST', ''), 8125)
+
+def incr_stat(name):
+    statsd_client.incr('puzzle.store.%s' % name)
 
 app = Flask(__name__)
 
@@ -50,6 +56,7 @@ def login(github):
     if session.get('gh') == github and session.get('username') in USERS:
         return redirect(url_for('store', github=github))
     if request.method == 'GET':
+        incr_stat('login_req')
         resp = Response(render_template('login.html', github=github, users=USERS))
         resp.headers[RESPONSE_TIME_HEADER] = '0.01'
         return resp
@@ -59,6 +66,7 @@ def login(github):
         response_time = 0.01
         if username in USERS:
             if not good_pass(password):
+                incr_stat('not_valid_password')
                 flash('Invalid Password (must be alphanumeric 6-12 characters)')
             else:
                 actual_password = gen_password(app.secret_key, github, username)
@@ -66,10 +74,12 @@ def login(github):
                 correct, compare_time = slow_compare(password, actual_password, PER_CHAR_DELAY)
                 response_time += compare_time
                 if correct:
+                    incr_stat('correct_password')
                     session['gh'] = github
                     session['username'] = username
                     return redirect(url_for('store', github=github))
                 else:
+                    incr_stat('bad_password')
                     flash('Bad Password')
         else:
             flash('invalid user')
@@ -88,6 +98,7 @@ def store(github):
     transfer_users = {k : v for k, v in USERS.items() if k != session['username']}
     total = sum(map(lambda u: balances.get(github, u), transfer_users)) + balance
     if total == 0:
+        incr_stat('reloaded_cash')
         balances.put(github, session['username'], 5)
         flash("You got lucky! We're giving you 5 HackCoins on this account.")
     name = USERS[session['username']]
@@ -101,6 +112,7 @@ def transfer(github):
         return "you can't transfer to yourself"
     if other_username not in USERS:
         return "user not found"
+    incr_stat('transfer')
     balances.transfer(github, session['username'], other_username)
     return redirect(url_for('store', github=github))
 
