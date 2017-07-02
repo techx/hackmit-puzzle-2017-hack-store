@@ -65,22 +65,21 @@ def login(github):
         password = request.form.get('password', '')
         response_time = 0.01
         if username in USERS:
+            actual_password = gen_password(app.secret_key, github, username)
+            print(actual_password)
+            correct, compare_time = slow_compare(password, actual_password, PER_CHAR_DELAY)
+            response_time += compare_time
             if not good_pass(password):
                 incr_stat('not_valid_password')
                 flash('Invalid Password (must be alphanumeric 6-12 characters)')
+            elif correct:
+                incr_stat('correct_password')
+                session['gh'] = github
+                session['username'] = username
+                return redirect(url_for('store', github=github))
             else:
-                actual_password = gen_password(app.secret_key, github, username)
-                print(actual_password)
-                correct, compare_time = slow_compare(password, actual_password, PER_CHAR_DELAY)
-                response_time += compare_time
-                if correct:
-                    incr_stat('correct_password')
-                    session['gh'] = github
-                    session['username'] = username
-                    return redirect(url_for('store', github=github))
-                else:
-                    incr_stat('bad_password')
-                    flash('Bad Password')
+                incr_stat('bad_password')
+                flash('Bad Password')
         else:
             flash('invalid user')
         resp = Response(render_template('login.html', github=github, users=USERS, username=username))
