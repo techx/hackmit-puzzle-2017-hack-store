@@ -10,7 +10,10 @@
   {% endif %}
 {% endwith %}
 </div>
-
+<!--
+STORE-1294: Your login speed could be improved by immediately terminating if a[i] != b[i]
+Re: STORE-1294: fixed!
+-->
 <form method="POST" action="{{ url_for('login', github=github) }}">
   <table>
     <tr>
